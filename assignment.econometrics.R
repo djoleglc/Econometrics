@@ -12,14 +12,12 @@ pred_log = function(data, model)
 {
   p = predict(model, data) 
   s2 = residuals(mod) %>% var()
-  return(exp^(p + 0.5*s2))
+  return(exp(p + 0.5*s2))
 }
 
-
-
-#our data set 
 data=sevs
 
+## point a ##
 #observing the dataset 
 View(data)
 
@@ -30,7 +28,6 @@ NA_number = is.na(data$wph) %>% sum()
 
 table(data$sex[is.na(data$wph)])
 #a lot of missing value in wph due to non worker people 
-#install.packages("fBasics")
 
 
 basicStats(data)
@@ -43,12 +40,13 @@ plot(density(data$jo))
 data1 = na.omit(data)
 
 
-#point b 
+## point b ## 
 #boxplot of men and women 
-men_women = ifelse(data1$sex==0, "Men", "Women",)
-boxplot(data1$wph~men_women, ylab="wph", main="Boxplot") 
+men = subset(data1, sex == 0)
+women = subset(data1, sex == 1)
+  
+boxplot(data1$wph~Sex, ylab="WPH", main="Boxplot",col=c(4,2)) 
 
-men = data1$sex==0
 
 tab = data.frame( "Mean"=c(
 mean(data1$wph[data1$sex==0]),
@@ -56,122 +54,82 @@ mean(data1$wph[data1$sex==1])),
 "Median"=c(
 median(data1$wph[data1$sex==0]),
 median(data1$wph[data1$sex==1])))
+tab
 
-xtable(tab, digits=3)
+hist(men$wph)
+hist(women$wph)
 
-
-hist(data1$wph[men])
-hist(data1$wph[!men])
-plot(density(data1$wph[men]), ylim=c(0,0.07), main="Estimated densities")
-lines(density(data1$wph[!men]), col=2)
+plot(density(men$wph), ylim=c(0,0.07), main="Estimated densities")
+lines(density(women$wph), col=2)
 legend("topright", c("Men", "Women"), lty=1, col=1:2)
 
-summary(data1$wph[men])
-summary(data1$wph[!men])
+summary(men$wph)
+summary(women$wph)
 
-q_men = quantile(data1$wph[men], probs = seq(0, 1, 0.05))[c(2,20)]
-q_women = quantile(data1$wph[!men], probs = seq(0, 1, 0.05))[c(2,20)]
-
-
+q_men = quantile(men$wph, probs = seq(0, 1, 0.05))[c(2,20)]
+q_women = quantile(women$wph, probs = seq(0, 1, 0.05))[c(2,20)]
 
 
-#point c 
+## point c ## 
 exp2=data1$exp^2
 mod = lm(log(wph) ~  edu + exp + exp2, data=data1)
 summary(mod)
-stargazer(mod)
+#stargazer(mod)
 
 
-
-summary(rq(log(wph) ~  edu + exp + exp2, data=data1))
 #edu positive regardless the experience
 #exp difficult to interpret, we have to watch the slide
 mod$coef*100
-plot(fitted(mod),residuals(mod))
+plot(fitted(mod),residuals(mod), xlab="fitted", ylab="residuals")
 
-#lines(p(-4:51), col=2, lwd=3)
-
-summary(mod)
-
+## point d ##
 #testing experience 
 #test F for both exp and exp2
-mod_reduced = mod_no = lm(log(wph) ~ edu, data=data1)
-anova(mod_reduced, mod)
-summary(mod)
+mod_reduced =  lm(log(wph) ~ edu, data=data1)
+anova(mod_reduced, mod,test="F")
 
+## point e ##
+coef(mod)
+opt = coef(mod)[3]/(-2*coef(mod)[4])
 
-
-plot(data1$exp, log(data1$wph), main="Title")
-abline(v=25.22534,col=2)
-
-mod_no = lm(log(wph) ~ exp + exp2, data=data1)
-opt_point = -coef(mod_no)[2]/(2*coef(mod_no)[3])
-pred_log(data.frame(exp=opt_point, exp2=opt_point^2), mod_no)
-
-
-summary(mod_no)
-
-p = function(x)
-{
-  return(mod_no$coefficients[1] + mod_no$coefficients[2]*x + mod_no$coefficients[3]*x^2)
-}
-
-hist(data1$exp)
-
-car::avPlots(mod)
-data[1318,]
-?avPlots
-#maxime the function used to predict the log(price)
-
+## point f ##
 pers = data.frame(edu = 17, exp=1, exp2=1)
-log_exp =predict(mod, pers) %>% as.numeric() 
-res = residuals(mod)
-s2 = var(res)
+pred_log(pers, mod)
 
-
-expect_wage = exp(log_exp + 0.5*s2);expect_wage
 #we assume that residuals are normally 
 #approximation of the real value 
 
-
-#check what this command does 
-
+## point g ##
+#colinearity
 vif(mod)
-#check if it works with quadratic relationship 
-
+#demeaning
 exp_nm = (data1$exp-mean(data1$exp))
 exp2_nm = (data1$exp-mean(data1$exp))^2
-mod_test = lm(log(wph) ~ edu + exp_nm +exp2_nm  , data=data1)
-vif(mod_test) %>% xtable(.,3)
-#######
-
-mod_test
-summary(mod_test)
-mod %>% summary()
-
-#why this happen ? 
-basicStats(data1$exp)
+vif(mod_test)
+#they are highly correlated 
+cor(exp2, data1$exp)
+#demeaning correlation
+cor(exp_nm, exp2_nm)
 
 
-m1 = lm(exp2 ~ exp + edu, data=data1)
-m1 %>% summary()
+#outliers
+car::avPlots(mod)
+#observation that seem most influence 
+#dfbeta
+par(mfrow=c(2,2))
 
-m2 = lm(exp ~ exp2 + edu, data=data1)
-m2 %>% summary()
-
-#so the problem is the quadratic function used to estimate wage 
-plot(data1$exp, exp2)
 dfbeta(mod) %>% summary() %>% xtable
-plot(dfbeta(mod)[,1],type="h")
+plot(dfbeta(mod)[,1],type="h",ylab="intercept", xlab="observation", 
+     main="dfbeta")
 abline(h=1, lty=2, col=2)
 abline(h=-1, lty=2, col=2)
-plot(dfbeta(mod)[,2],type="h")
+plot(dfbeta(mod)[,2],type="h",ylab="edu" , xlab="observation", main="dfbeta")
 abline(h=1, lty=2, col=2)
 abline(h=-1, lty=2, col=2)
-plot(dfbeta(mod)[,3],type="h")
+plot(dfbeta(mod)[,3],type="h", ylab="exp" , xlab="observation", main="dfbeta")
 abline(h=1, lty=2, col=2)
 abline(h=-1, lty=2, col=2)
-plot(dfbeta(mod)[,4],type="h")
+plot(dfbeta(mod)[,4],type="h", ylab="exp_squared",xlab="observation", main="dfbeta")
 abline(h=1, lty=2, col=2)
 abline(h=-1, lty=2, col=2)
 
@@ -179,32 +137,24 @@ which.max(dfbeta(mod)[,1])
 which.max(dfbeta(mod)[,2])
 which.max(dfbeta(mod)[,3])
 which.max(dfbeta(mod)[,4])
-plot(mod)
-#add quantile 90 95 5 
-#do histograms
 
-avPlots(mod)
 
 data2= na.omit(data[-1318,])
-exp2 = data2$exp^2
-mod_no1318 = lm(log(wph) ~  edu + exp + exp2, data=data2)
+exp2_no1318 = data2$exp^2
+mod_no1318 = lm(log(wph) ~  edu + exp + exp2_no1318, data=data2)
 summary(mod_no1318) %>% coef()
 summary(mod) %>% coef()
+avPlots(mod)
 avPlots(mod_no1318)
 
-
 #reset
-reset = resettest(mod, power = 3, "regressor")
+reset = resettest(mod, power = 4, "regressor")
 reset
-xtable(reset)
 
-?reset 
-
-#add interaction 
+#add exp^3
 plot(data1$edu, log(data1$wph))
 edu2 =  data1$edu^2
 exp3 = data1$exp^3
-exp4 = data1$exp^4
 mod_int = lm(log(wph) ~  edu+ exp + exp2 + exp3, data=data1)
 mod_int %>% summary()
 stargazer(mod_int)
@@ -215,80 +165,50 @@ AIC(mod_int)
 BIC(mod)
 BIC(mod_int)
 
-###sex 
+## point i ##
 data1$sex = ifelse(data1$sex==0, "Male", "Female")
 data1$sex = factor(data1$sex, levels = c("Male","Female"))
-mod_sex = mod = lm(log(wph) ~  edu + exp + exp2+sex, data=data1)
-mod_sex = mod = lm(log(wph) ~ sex, data=data1)
+mod_sex = lm(log(wph) ~  edu + exp + exp2+sex, data=data1)
 summary(mod_sex)
-stargazer(mod_sex)
-#### chow test 
-mod_chow = lm(log(wph) ~  edu + exp + exp2 +sex*(edu + exp + exp2), data=data1)
-summary(mod_chow)
-anova( mod, mod_chow)
 
-###### bonus
-#add exp3
-#demeaning experience 
-#add hi 
+## point j ##
+mod_2 = lm(log(wph) ~  edu + exp + exp2 +sex*(edu + exp + exp2), data=data1)
+summary(mod_2)
+anova(mod, mod_2)
 
 
+### bonus point #### 
+
+BIC(mod_2)
+AIC(mod_2)
+
+mod_2_1 = lm(log(wph) ~  edu + exp + exp2 +sex*(  exp + exp2), data=data1)
+anova(mod_2_1,mod_2)
+
+mod_2_2 = lm(log(wph) ~  edu + exp + exp2 +sex*(  exp + exp2) +jo, data=data1)
+summary(mod_2_2)
+
+#the variable jo seems to be not significant diverse from 0 
+#let's see children and also the interaction between children and sex
+
+mod_2_3 = lm(log(wph) ~  edu + exp + exp2 +sex*(  exp + exp2) +kt, data=data1)
+summary(mod_2_3)
+
+mod_2_4 = lm(log(wph) ~  edu + exp + exp2 +sex*(  exp + exp2+kt) , data=data1)
+summary(mod_2_4)
 
 
-add1(mod_chow, ~. + hi, test="F")
-mod_chow_2 = lm(log(wph) ~  edu + exp + exp2 
-                +sex*(edu + exp + exp2) + hi, data=data1)
-summary(mod_chow)
+#effect of children on women 
+coef(mod_2_4)[6] + coef(mod_2_4)[9] 
 
 
-mod_chow_2_mod = lm(log(wph) ~  edu + exp + exp2 
-                +sex*(edu + exp + exp2) + hi -edu:sex, data=data1)
+#### add hi 
+mod_2_5 =  lm(log(wph) ~  edu + exp + exp2 +sex*(  exp + exp2+kt) + hi, data=data1)
+summary(mod_2_5)
+coef(mod_2_5)
 
-anova(mod_chow_2, mod_chow_2_mod)
+anova(mod_2, mod_2_5)
 
-mod_chow_2_int = lm(log(wph) ~  edu + exp + exp2 
-                                 +sex*(edu + exp + exp2+hi) , data=data1)
-anova(mod_chow_2, mod_chow_2_int)
-
-
-#trying jo
-
-mod_chow_3 = lm(log(wph) ~  edu + exp + exp2 
-                    +sex*(edu + exp + exp2) +hi +jo , data=data1)
-anova(mod_chow_2,mod_chow_3)
-
-
-
-
-# MECHANICAL APPLICATION NOT TO USE TOO EASILY
-
-library(olsrr)
-m=(lm(log(wph)~.,data=data1))
-k = ols_step_forward_p(m)
-plot(k)
-
-b = ols_step_backward_p(m)
-plot(b)
-
-#g= ols_step_all_possible(m)
-#plot(g)
-
-library(olsrr)
-p = ols_step_both_p(m)
-
-
-ols_step_forward_aic(mod_chow)
-
-
-
-
-ols_step_backward_aic(m)
-
-stargazer(mod)
-
-###
-reset = resettest(mod, power = 4)
-reset
-
-
+BIC(mod_2_5)
+AIC(mod_2_5)
 
