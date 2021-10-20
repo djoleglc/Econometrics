@@ -44,16 +44,16 @@ data1 = na.omit(data)
 #boxplot of men and women 
 men = subset(data1, sex == 0)
 women = subset(data1, sex == 1)
-  
+
 boxplot(data1$wph~Sex, ylab="WPH", main="Boxplot",col=c(4,2)) 
 
 
 tab = data.frame( "Mean"=c(
-mean(data1$wph[data1$sex==0]),
-mean(data1$wph[data1$sex==1])), 
-"Median"=c(
-median(data1$wph[data1$sex==0]),
-median(data1$wph[data1$sex==1])))
+  mean(data1$wph[data1$sex==0]),
+  mean(data1$wph[data1$sex==1])), 
+  "Median"=c(
+    median(data1$wph[data1$sex==0]),
+    median(data1$wph[data1$sex==1])))
 tab
 
 hist(men$wph)
@@ -151,20 +151,7 @@ avPlots(mod_no1318)
 reset = resettest(mod, power = c(2,3,4), "fitted")
 reset
 
-#add exp^3
-plot(data1$edu, log(data1$wph))
-edu2 =  data1$edu^2
-exp3 = data1$exp^3
-mod_int = lm(log(wph) ~  edu+ exp + exp2 + exp3, data=data1)
-mod_int %>% summary()
-stargazer(mod_int)
 
-
-#confronting values of AIC and BIC
-AIC(mod)
-AIC(mod_int)
-BIC(mod)
-BIC(mod_int)
 
 ## point i ##
 data1$sex = ifelse(data1$sex==0, "Male", "Female")
@@ -212,4 +199,3 @@ anova(mod_2, mod_2_5)
 
 BIC(mod_2_5)
 AIC(mod_2_5)
-
