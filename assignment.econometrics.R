@@ -148,7 +148,7 @@ avPlots(mod)
 avPlots(mod_no1318)
 
 #reset
-reset = resettest(mod, power = 4, "regressor")
+reset = resettest(mod, power = c(2,3,4), "fitted")
 reset
 
 #add exp^3
@@ -159,7 +159,8 @@ mod_int = lm(log(wph) ~  edu+ exp + exp2 + exp3, data=data1)
 mod_int %>% summary()
 stargazer(mod_int)
 
-resettest(mod_int, power = 4, "regressor")
+
+#confronting values of AIC and BIC
 AIC(mod)
 AIC(mod_int)
 BIC(mod)
