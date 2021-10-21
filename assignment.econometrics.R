@@ -8,7 +8,7 @@ library(quantreg)
 library(fBasics)
 library(lmtest)
 
-
+sevs=read.csv("sevs.csv")
 data=sevs
 
 ## point a ##
