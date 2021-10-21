@@ -8,7 +8,7 @@ library(quantreg)
 library(fBasics)
 library(lmtest)
 
-pred_log = function(data, model)
+pred_log = function(data, model)  ##Gives the predicted value of data given a log model
 {
   p = predict(model, data) 
   s2 = residuals(mod) %>% var()
@@ -56,13 +56,16 @@ tab = data.frame( "Mean"=c(
     median(data1$wph[data1$sex==1])))
 tab
 
+##histogram
 hist(men$wph)
 hist(women$wph)
 
+##density plot
 plot(density(men$wph), ylim=c(0,0.07), main="Estimated densities")
 lines(density(women$wph), col=2)
 legend("topright", c("Men", "Women"), lty=1, col=1:2)
 
+##mean, median
 summary(men$wph)
 summary(women$wph)
 
@@ -72,6 +75,7 @@ q_women = quantile(women$wph, probs = seq(0, 1, 0.05))[c(2,20)]
 
 ## point c ## 
 exp2=data1$exp^2
+## Mincer equation
 mod = lm(log(wph) ~  edu + exp + exp2, data=data1)
 summary(mod)
 #stargazer(mod)
