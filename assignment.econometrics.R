@@ -11,7 +11,7 @@ library(lmtest)
 pred_log = function(data, model)  ##Gives the predicted value of data given a log model
 {
   p = predict(model, data) 
-  s2 = residuals(mod) %>% var()
+  s2 = sum((residuals(model)- mean(residuals(model)))^2 / length(coef(model))
   return(exp(p + 0.5*s2))
 }
 
