@@ -8,12 +8,6 @@ library(quantreg)
 library(fBasics)
 library(lmtest)
 
-pred_log = function(data, model)  ##Gives the predicted value of data given a log model
-{
-  p = predict(model, data) 
-  s2 = sum((residuals(model)- mean(residuals(model)))^2) / (N-length(coef(model))))
-  return(exp(p + 0.5*s2))
-}
 
 data=sevs
 
@@ -98,7 +92,9 @@ opt = coef(mod)[3]/(-2*coef(mod)[4])
 
 ## point f ##
 pers = data.frame(edu = 17, exp=1, exp2=1)
-pred_log(pers, mod)
+p = predict(mod, pers) 
+s2 = sum(residuals(mod)^2) / (dim(data1)[1]-(length(coef(model))))
+estimation=exp(p + 0.5*s2);estimation
 
 #we assume that residuals are normally 
 #approximation of the real value 
