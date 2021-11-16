@@ -48,5 +48,5 @@ mod_PW2 = prais_winsten(lavgprc ~ t + mon + tues + wed + thurs, data = data, dat
 summary(mod_PW) #R^2 = 0.2659
 "anova function doesnt work for prais"
 R_0 = 0.1353; R_1 = 0.2659
-F = ((R_1 - R_0)/2)/((1-R_1) * 90)
+F = ((R_1 - R_0)/2)/((1-R_1) / 90)
 df(F, 2, 90)
