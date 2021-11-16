@@ -1,0 +1,82 @@
+
+library(readr)
+library(dplyr)
+library(car)
+library(caret)
+library(lmtest)
+library(sandwich)
+library(prais)
+
+head(fish)
+ #ex1
+
+#question a)
+mod_a = lm(lavgprc ~ t + mon + tues + wed + thurs, data = fish)
+mod_a%>% summary()
+
+#in order to check that the day of the week is statistically 
+#significant we have to do an F test
+
+mod_a_HO = lm(lavgprc ~ t, data = fish)
+#testing the day of the week 
+anova(mod_a_HO, mod1, test="F")
+#they seem to be useless in order to predict the log average price
+
+
+
+#question b)
+mod_b = lm(lavgprc ~ t + mon + tues + wed + thurs
+          + wave2 + wave3, data = fish)
+mod_b %>% summary()
+
+#individually wave2 is statistically significant for every reasonable level 
+#individually wave 3 is statistically significant at 0.05
+
+#testing jointly significance
+
+anova(mod_a, mod_b, test="F")
+
+#the two variable are jointly significance
+#we can see that the stormy see has effect on future 4 days.
+#in fact we see that the situation of the see during last two days
+#influence the price of the fish positively, if the average maximum height
+#of the wave is bigger of 1m, the price is expected be bigger of 9% for 
+#the next two days and also this will increment the 
+#price of 3-4 days in the future by 4.7% 
+
+#question d)
+res = residuals(mod_b)
+#we can visualize the residuals
+plot(res)
+#durbin watson test 
+durbinWatsonTest(mod_b)
+#we reject the hypothesis of rho equal to 0 
+#we can also do the breusch godfrey test 
+
+bgtest(mod_b)
+#also this test give us the same result, the same conclusion 
+
+#question e)
+#calculating the newey west covariance and the t tests
+cov = NeweyWest(mod_b, lag = 4, verbose=TRUE)
+t_tests_newey_west = coeftest(mod_b, cov)
+
+
+#question f)
+#prais winsten estimates for the model 
+
+mod_prais_winsten = prais_winsten(lavgprc ~ t + mon + tues + wed + thurs
+              + wave2 + wave3, data = fish,index=fish$t)
+mod_prais_winsten_H0 = prais_winsten(lavgprc ~ t + mon + tues + wed + thurs
+                                   , data = fish,index=fish$t)
+
+#we have to test joint significance 
+res1 = mod_prais_winsten$residuals
+res2 = mod_prais_winsten_H0$residuals
+s0 = sum(res2^2)/96
+s1 = sum(res1^2)/96
+f_test = ((s0-s1)/s1) * (97-length(coef(mod_prais_winsten)))/2
+pvalue = 1- pf(f_test, 2, 97-length(coef(mod_prais_winsten)))
+#fom this solution I will reject the hypothesis that 
+#the two lagged variable are not significant important 
+#for explaining the average log price of fish 
