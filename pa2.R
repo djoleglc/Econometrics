@@ -33,13 +33,15 @@ e_t1 = residuals(mod_b)[1:96] # lagged residual
 mod_BG = lm(e_t ~ e_t1 + t[2:97] + mon[2:97] + tues[2:97] + wed[2:97] + thurs[2:97] + wave2[2:97] + wave3[2:97], data = data)
 summary(mod_BG) #R^2 = 0.404
 K = 96 * 0.404
-dchisq(K, 1) # =0 -> rho!=0 auto regressive process
+1-pchisq(K, 1) # =0 -> rho!=0 auto regressive process
 
 ##Question e##
-V_NW = NeweyWest(mod_b, 4) #Newey-West covvariance matrix
+V_NW = NeweyWest(mod_b, 4) #Newey-West covariance matrix
 View(V_NW)
 t_wave2 = coefficients(mod_b)[7] / sqrt(V_NW[7,7]) #Calculation of the t stat #Is it true?
 t_wave3 = coefficients(mod_b)[8] / sqrt(V_NW[8,8])
+(1-pt(t_wave2, 91))*2
+(1-pt(t_wave3, 91))*2
 summary(mod_b)
 
 ##Question f##
@@ -50,7 +52,7 @@ summary(mod_PW) #R^2 = 0.2659
 "anova function doesnt work for prais"
 R_0 = 0.1353; R_1 = 0.2659
 F = ((R_1 - R_0)/2) / ((1-R_1) / 90)
-df(F, 2, 90)
+1-pf(F, 2, 90) #=0.00063 reject null hypothesis -> wave2 + wave3 relevant
 
 
 
@@ -81,7 +83,7 @@ mod_IV_k = ivreg(ltotqty ~ lavgprc  + mon + tues + wed +thurs + t| speed3 + mon 
 summary(mod_IV_k)
 
 ##Question l##
-"We perform a F test on the 1 stage regression to decide wether wave +speed is a strong instument "
+# We perform a F test on the 1 stage regression to decide whether wave +speed is a strong instrument #
 
 mod_1st_step_l = lm(lavgprc ~ wave2 + speed3 + mon + tues + wed + thurs + t, data = data)
 mod_aux = lm(lavgprc ~ mon + tues + wed + thurs + t, data = data)
@@ -95,13 +97,13 @@ summary(mod_IV_l)
 mod_sargan = lm(residuals(mod_IV_l) ~ wave2 + speed3 + mon + tues + wed +thurs + t, data = data)
 summary(mod_sargan) #R^2 = 0.02025
 S = 97 * 0.02025
-dchisq(S, 1) # = 0.1066 we do not reject the null hypothesis at 5%
+1-pchisq(S, 1) # = 0.16105 we do not reject the null hypothesis
 
 ##Question n##
 # D-W-H test
 Nu_hat_2 = residuals(mod_1st_step_l)
 mod_DWH_2 = lm(ltotqty ~ lavgprc  + mon + tues + wed +thurs + t + Nu_hat_2, data = data)
-summary(mod_DWH_2) # t value = 0.09653 we reject at 10% but not a 5%   
+summary(mod_DWH_2) # t value = 0.09653 we reject at 10% but not a 5%
 
 ##Bonus##
 #modified Prais-winsten?
