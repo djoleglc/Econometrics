@@ -52,7 +52,7 @@ summary(mod_PW) #R^2 = 0.03649
 "anova function doesnt work for prais"
 R_0 = summary(mod_PW)$r.squared; R_1 = summary(mod_PW2)$r.squared
 F = ((R_1 - R_0)/2) / ((1-R_1) / 89)
-1-pf(F, 2, 89) # reject null hypothesis -> wave2 + wave3 relevant
+1-pf(abs(F), 2, 89) # reject null hypothesis -> wave2 + wave3 relevant
 
 
 
