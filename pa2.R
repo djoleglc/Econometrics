@@ -48,11 +48,11 @@ summary(mod_b)
 mod_PW = prais_winsten(lavgprc ~ t + mon + tues + wed + thurs + wave2 + wave3, data = data, data$t) #Prais-Winsten estimators with 8 iteration rho = 0.6874
 summary(mod_PW) #R^2 = 0.1353
 mod_PW2 = prais_winsten(lavgprc ~ t + mon + tues + wed + thurs, data = data, data$t)
-summary(mod_PW) #R^2 = 0.2659
+summary(mod_PW) #R^2 = 0.03649
 "anova function doesnt work for prais"
-R_0 = 0.1353; R_1 = 0.2659
-F = ((R_1 - R_0)/2) / ((1-R_1) / 90)
-1-pf(F, 2, 90) #=0.00063 reject null hypothesis -> wave2 + wave3 relevant
+R_0 = summary(mod_PW)$r.squared; R_1 = summary(mod_PW2)$r.squared
+F = ((R_1 - R_0)/2) / ((1-R_1) / 89)
+1-pf(F, 2, 89) # reject null hypothesis -> wave2 + wave3 relevant
 
 
 
