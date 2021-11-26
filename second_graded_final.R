@@ -302,14 +302,22 @@ anova(first_stage_both_HO , first_stage_both, test = "F")
 #we can do the sargan test for testing overidentyfing restriction
 #we can see the sargan test results in the summary of an iv reg object using diagnostics = TRUE
 summary(iv_reg_3, diagnostic = TRUE)
-#We can extract the results
+#We can get the results of the diagnostic
 summary(iv_reg_3, diagnostic = TRUE)$diagnostic
 
 #we can see the sargan test in summary of the gmm object 
 #it is called J test 
 summary(gmm_reg_iterative_3, diagnostic = TRUE)
 
-
+#question n)
+#Durbin-Wu-Haussman test
+#First we need to extract the residuals of the 1 stage regression
+Nu_hat = residuals(first_stage_both)
+#Then we add this residual to the model and check its relevance using a t test
+DWHtest = lm(ltotqty ~ lavgprc  + mon + tues + wed + thurs + t + Nu_hat, data = fish)
+#t test
+coeftest(DWHtest)
+# reject the null hypothesis at 10% but not at 5% confidence
 
 
 
