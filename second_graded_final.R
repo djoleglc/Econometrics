@@ -63,7 +63,10 @@ mod_b %>% summary()
 
 #individually wave2 is statistically significant for every reasonable level 
 #individually wave 3 is statistically significant at 0.05
+#we can also calculate the covariance between t and wave2 and t and wave3
 
+cor(fish$wave2, fish$t)
+cor(fish$wave3, fish$t)
 
 #testing jointly significance
 #we can test the jointly significance of the variable wave2 and wave3
