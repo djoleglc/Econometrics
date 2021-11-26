@@ -121,7 +121,8 @@ t_tests_newey_west
 
 #question f)
 #we estimate the model using prais winsten transformation 
-#we can do it using the function prais winsten, and specifying the formula of the model  
+#we can do it using the function prais winsten, and specifying the formula of the model and the time variable.
+#This also gives a estimated rho.
 mod_pw = prais_winsten(lavgprc ~ t + mon + tues + wed + thurs + wave2 + 
                          wave3, data = fish, fish$t) 
 #we can visualize the estimations of the coefficients using prais winsten transformation
@@ -147,7 +148,6 @@ linearHypothesis(mod_pw, vcov = vcovHC(mod_pw, "HC0"),
 #ex2 
 
 #question g) 
-#question i)
 
 #we estimate the model specified in point g) using an OLS regression
 mod_g = lm(ltotqty ~ lavgprc +  mon + tues +wed + thurs + t, data = fish)
@@ -160,7 +160,8 @@ mod_g %>% summary()
 coef(mod_g)
 
 
- 
+# question i)
+
 #weak instrument or strong instrument?
 # we estimate the first stage regression using an OLS regression
 first_stage = lm( lavgprc ~  wave2 +  mon + tues + wed + thurs + t, data = fish)
@@ -207,7 +208,6 @@ gmm_reg_iterative = gmm(ltotqty ~ lavgprc +  mon +
                  tues + wed + thurs + t , data = fish, type="iterative")
 #visualize the results of the estimation of the model using gmm 
 summary(gmm_reg_iterative)
-
 
 
 #using speed3 as instrumental variable instead of wave 2
@@ -295,13 +295,15 @@ anova(first_stage_both_HO , first_stage_both, test = "F")
 #the value of the F is equal to 12
 
 
-
+#question m)
 #testing overidentyfing restriction and endogeneity 
 
 #sargan test 
 #we can do the sargan test for testing overidentyfing restriction
 #we can see the sargan test results in the summary of an iv reg object using diagnostics = TRUE
 summary(iv_reg_3, diagnostic = TRUE)
+#We can extract the results
+summary(iv_reg_3, diagnostic = TRUE)$diagnostic
 
 #we can see the sargan test in summary of the gmm object 
 #it is called J test 
