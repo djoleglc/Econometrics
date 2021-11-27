@@ -335,8 +335,14 @@ nw = NeweyWest(iv_reg_3,lag=4, prewhite=FALSE, adjust =TRUE)
 #we can now see the new estimated t statistic of the model 2SLS
 coeftest(iv_reg_3, vcov =nw)
 
-
-
+#Another idea is to use a 2SLS a approach, but in the 1st step we take into account the autocorrelation
+#We use Prais Winsten estimator for 1st step
+step1_pw = prais_winsten(lavgprc ~ mon + tues +  wed + thurs + t + wave2 + speed3, data = fish, fish$t)
+#We extract the fitted value of this model
+pw_lavgprc = step1_pw$fitted.values
+#2nd step
+bonus = lm(ltotqty ~ pw_lavgprc  + mon + tues + wed +thurs + t, data = fish)
+summary(bonus)
 
 
 
