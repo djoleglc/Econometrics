@@ -330,7 +330,7 @@ coeftest(DWHtest)
 #how can we adjust the IV standard errors estimated for autocorrelation
 #we can do it using the Neweywest variance-covariance matrix
 #we choose, to use lag = 4 using the rule of thumb 
-nw = NeweyWest(iv_reg_3,lag=4)
+nw = NeweyWest(iv_reg_3,lag=4, prewhite=FALSE, adjust =TRUE)
 
 #we can now see the new estimated t statistic of the model 2SLS
 coeftest(iv_reg_3, vcov =nw)
