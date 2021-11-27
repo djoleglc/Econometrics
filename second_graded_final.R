@@ -13,7 +13,7 @@ library(gmm)
 
 #we load the dataset 
 # in order to do that we have to read an csv file 
-fish <- read_csv("../fish.csv")
+#fish <- read_csv("../fish.csv")
 
 
 #firstly we visualize our dataset to check that everything is ok
@@ -55,7 +55,7 @@ f_test_days
 #question b)
 # we calculate the OLS regression using also the variables wave2 and wave3
 mod_b = lm(lavgprc ~ t + mon + tues + wed + thurs
-          + wave2 + wave3, data = fish)
+           + wave2 + wave3, data = fish)
 
 #we visualize the results of the estimation of the model
 #coefficient, standard errors, t stat, pvalue
@@ -109,7 +109,7 @@ bgtest(mod_b)
 #we calculate the variance-covariance matrix of newey west for the model defined
 #at point b
 #the have to give a lag value, we have choosen 4
-nw = NeweyWest(mod_b, lag = 4, verbose=FALSE)
+nw = NeweyWest(mod_b, lag = 4, verbose=FALSE, prewhite=FALSE, adjust=TRUE)
 
 #using the newey west matrix we can calculate the t-statistics for the model b)
 #we use the function coeftest defining vcov = nw, that specify the variance-covariance matrix
@@ -189,7 +189,7 @@ drop1(first_stage, test ="F")[2,]
 #to use in the model
 #we estimate the instrumental variable model using 2SLS
 iv_reg = ivreg(ltotqty ~ lavgprc +  mon +
-               tues +wed + thurs + t | wave2 +  mon +
+                 tues +wed + thurs + t | wave2 +  mon +
                  tues + wed + thurs + t , data = fish)
 
 #results of the model
@@ -204,8 +204,8 @@ iv_robust
 #we estimate the model also using iterative GMM
 #we can do it using the function gmm
 gmm_reg_iterative = gmm(ltotqty ~ lavgprc +  mon +
-                 tues +wed + thurs + t  , ~ wave2 +  mon +
-                 tues + wed + thurs + t , data = fish, type="iterative")
+                          tues +wed + thurs + t  , ~ wave2 +  mon +
+                          tues + wed + thurs + t , data = fish, type="iterative")
 #visualize the results of the estimation of the model using gmm 
 summary(gmm_reg_iterative)
 
@@ -213,8 +213,8 @@ summary(gmm_reg_iterative)
 #using speed3 as instrumental variable instead of wave 2
 #we estimate the model as the previous point 
 iv_reg_2 = ivreg(ltotqty ~ lavgprc +  mon +
-                 tues +wed + thurs + t | speed3 +  mon +
-                 tues + wed + thurs + t , data = fish)
+                   tues +wed + thurs + t | speed3 +  mon +
+                   tues + wed + thurs + t , data = fish)
 #results of the estimation of the model 
 iv_reg_2 %>% summary()
 
@@ -223,8 +223,8 @@ iv_robust_2 = coeftest(iv_reg_2, vcov = vcovHC(iv_reg_2, "HC3"))
 
 #estimate the model using iterative GMM 
 gmm_reg_iterative_2 = gmm(ltotqty ~ lavgprc +  mon +
-                   tues +wed + thurs + t ,~speed3 +  mon +
-                   tues + wed + thurs + t , data = fish,type="iterative")
+                            tues +wed + thurs + t ,~speed3 +  mon +
+                            tues + wed + thurs + t , data = fish,type="iterative")
 
 #results of the estimation of the models
 gmm_reg_iterative_2 %>% summary()
@@ -267,8 +267,8 @@ coeftest(iv_reg_3, vcov = vcovHC(iv_reg_3, "HC3"))
 #lastly we estimate the model using iteriative GMM
 #we do it using gmm()
 gmm_reg_iterative_3 = gmm(ltotqty ~ lavgprc +  mon +
-                   tues +wed + thurs + t ,~ wave2 + speed3 +  mon +
-                   tues + wed + thurs + t , data = fish, type="iterative")
+                            tues +wed + thurs + t ,~ wave2 + speed3 +  mon +
+                            tues + wed + thurs + t , data = fish, type="iterative")
 
 #we can see the results of the GMM regression
 summary(gmm_reg_iterative_3)
@@ -279,7 +279,7 @@ summary(gmm_reg_iterative_3)
 #we estimate the model relative to the first stage regression using OLS regression
 
 first_stage_both = lm( lavgprc ~  wave2 + speed3 +  mon +
-                          tues + wed + thurs + t, data = fish)
+                         tues + wed + thurs + t, data = fish)
 
 #visualize the results of the estimation of the model 
 first_stage_both %>% summary()
@@ -304,6 +304,9 @@ anova(first_stage_both_HO , first_stage_both, test = "F")
 summary(iv_reg_3, diagnostic = TRUE)
 #We can get the results of the diagnostic
 summary(iv_reg_3, diagnostic = TRUE)$diagnostic
+
+#correlation between instrument
+cor(fish$wave2, fish$speed3)
 
 #we can see the sargan test in summary of the gmm object 
 #it is called J test 
@@ -331,6 +334,7 @@ nw = NeweyWest(iv_reg_3,lag=4)
 
 #we can now see the new estimated t statistic of the model 2SLS
 coeftest(iv_reg_3, vcov =nw)
+
 
 
 
