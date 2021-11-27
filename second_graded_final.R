@@ -135,12 +135,12 @@ summary(mod_pw)
 #specifying const we are assuming constant variances 
 linearHypothesis(mod_pw, vcov = vcovHC(mod_pw, "const"),
                  c("wave2 = 0", "wave3 = 0"), 
-                 test = "F") 
+                 test = "Chisq") 
 
 #we can also do this test using a robust estimation of the covariance-variance matrix HC0
 linearHypothesis(mod_pw, vcov = vcovHC(mod_pw, "HC0"),
                  c("wave2 = 0", "wave3 = 0"), 
-                 test = "F") 
+                 test = "Chisq") 
 
 
 
